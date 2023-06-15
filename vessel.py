@@ -58,11 +58,20 @@ class Vessel:
     def mole(self):
         return self.state.moles
 
+    @mole.setter
+    def mole(self, changed_mole_amount: float):
+        self.state.moles = changed_mole_amount
+        self.state.pressure = ideal_gas.pressure(self.state.volume,
+                                                  self.state.moles,
+                                                  self.state.temperature)
+
+
+        
     def __repr__(self):
         return textwrap.dedent('''\
                 <Vessel pressure_pa:{}, 
-                volume_m3:{}, temperature_k:{}, moles:{}'''.format(
-                    self.state.pressure,
+                volume_m3:{}, temperature_k:{}, moles:{}>'''.format(
+                    self.state.pressure - ideal_gas.BARO_PRESSURE,
                     self.state.volume,
                     self.state.temperature,
                     self.state.moles))
@@ -81,5 +90,13 @@ def test():
     assert pressure == 101325.0
     print(v)
 
+def pressurize(step):
+    flow_rate = ideal_gas.moles(ideal_gas.BARO_PRESSURE, 0.1,
+                                ideal_gas.celsius_to_kelvin(21))
+    v = Vessel(100.0, 0.0)
+    for i in range(10):
+        v.mole = v.mole + flow_rate
+        print(v)
+
 if __name__ == '__main__':
-    test()
+    pressurize(10)
