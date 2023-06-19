@@ -8,6 +8,9 @@ MOLE_PER_M3 = 1000/LITER_PER_MOLE
 def celsius_to_kelvin(c: float) -> float:
     return c + 273.15
 
+def kelvin_to_celcius(k: float) -> float:
+    return k - 273.15
+
 def pressure(cubic_meter_volume: float,
              total_moles: float, temperature_kelvin: float) -> float:
     #p = nRT/V

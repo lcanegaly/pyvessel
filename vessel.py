@@ -59,44 +59,43 @@ class Vessel:
         return self.state.moles
 
     @mole.setter
-    def mole(self, changed_mole_amount: float):
-        self.state.moles = changed_mole_amount
+    def mole(self, total_molar_quantity: float):
+        """Sets molar volume by changing moles per volume. Solves for pressure.
+        """
+        self.state.moles = total_molar_quantity
         self.state.pressure = ideal_gas.pressure(self.state.volume,
-                                                  self.state.moles,
-                                                  self.state.temperature)
+                                                 self.state.moles,
+                                                 self.state.temperature)
 
+    def transfer(self, volume_m3: float):
+        """Transfers gas by volume into or out of vessel. Solves for pressure.
+        """
+        moles_transfered = ideal_gas.moles(self.pressure, volume_m3,
+                                           self.temperature)
+        self.mole += moles_transfered
 
-        
     def __repr__(self):
         return textwrap.dedent('''\
-                <Vessel pressure_pa:{}, 
-                volume_m3:{}, temperature_k:{}, moles:{}>'''.format(
-                    self.state.pressure - ideal_gas.BARO_PRESSURE,
-                    self.state.volume,
-                    self.state.temperature,
-                    self.state.moles))
+                <Vessel Pressure Pa:{} | Volume_m3:{} | Temperature_c:{}'''\
+                ''' | moles:{}>'''.format(
+                    self.pressure - ideal_gas.BARO_PRESSURE,
+                    self.volume,
+                    ideal_gas.kelvin_to_celcius(self.temperature),
+                    self.mole))
 
 
 def test():
     #create a test vessel of 1m3 at 0C and check for correct outputs
     v = Vessel(1.0, 0.0)
-    volume = v.state.volume
-    temperature = v.state.temperature
-    pressure = v.state.pressure
-    moles = v.state.moles
+    volume = v.volume
+    temperature = v.temperature
+    pressure = v.pressure
+    moles = v.mole
     assert volume == 1.0
     assert temperature == 273.15
     assert moles == 44.61503340547032
     assert pressure == 101325.0
     print(v)
 
-def pressurize(step):
-    flow_rate = ideal_gas.moles(ideal_gas.BARO_PRESSURE, 0.1,
-                                ideal_gas.celsius_to_kelvin(21))
-    v = Vessel(100.0, 0.0)
-    for i in range(10):
-        v.mole = v.mole + flow_rate
-        print(v)
-
 if __name__ == '__main__':
-    pressurize(10)
+    test()
